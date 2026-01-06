@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 export interface IEvent {
   title: string
   content: string
-  date: Record<string, any> | null
+  date: Date | null
   owner: mongoose.Types.ObjectId
   status: 'pending' | 'completed'
   createdAt: Date
@@ -19,7 +19,7 @@ const EventSchema = new mongoose.Schema<IEvent>({
     required: true,
   },
   date: {
-    type: Object,
+    type: Date,
     default: null,
   },
   owner: {

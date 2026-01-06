@@ -27,8 +27,8 @@ export function useDateFormatter() {
         return null
       }
 
-      // Format using date-fns with Polish locale
-      return format(dateObj, 'dd MMM yyyy', { locale: pl })
+      // Format using date-fns
+      return format(dateObj, 'dd MMM yyyy')
     }
     catch {
       return null

@@ -17,12 +17,12 @@ export default defineEventHandler(async (event) => {
     }
 
     // Delete the event
-    const deleteEvent = await UserEvent.findOneAndDelete({
+    const deletedEvent = await UserEvent.findOneAndDelete({
       _id: eventId,
       owner: session.id,
     })
 
-    if (!deleteEvent) {
+    if (!deletedEvent) {
       throw createError({
         statusCode: 404,
         statusMessage: 'Event not found or you are not the owner',

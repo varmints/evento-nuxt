@@ -13,7 +13,7 @@ const formattedEvents = computed(() => {
 async function completeEvent(eventId: string, action: 'delete' | 'complete') {
   try {
     if (action === 'delete') {
-      await $fetch(`/api/events/${eventId}`, {
+      await $fetch(`/api/events/${eventId}/delete`, {
         method: 'DELETE',
       })
     }
@@ -99,6 +99,14 @@ async function completeEvent(eventId: string, action: 'delete' | 'complete') {
         <!-- action buttons -->
 
         <div class="flex items-center gap-2 mt-4">
+          <UButton
+            variant="outline"
+            size="xs"
+            :to="`/events/${event._id}/edit`"
+          >
+            Edit
+          </UButton>
+
           <UButton
             v-if="event.status === 'pending'"
             variant="outline"

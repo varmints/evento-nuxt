@@ -3,14 +3,21 @@ import type { CalendarDate } from '@internationalized/date'
 import { getLocalTimeZone } from '@internationalized/date'
 import { format } from 'date-fns'
 
+const route = useRoute()
 const toast = useToast()
 const loading = ref(false)
 const errors = ref<string[]>([])
 const selectedDate = shallowRef<CalendarDate | null>(null)
 
+const eventId = route.params.id as string
+
+// Fetch the event
+const { data: event, error: fetchError } = await useFetch(`/api/events/${eventId}`)
+
+// Pre-fill form
 const formData = reactive({
-  title: '',
-  content: '',
+  title: event.value?.title || '',
+  content: event.value?.content || '',
   date: null as Date | null,
 })
 
@@ -22,19 +29,28 @@ watch(
   },
 )
 
-async function onSubmit(event: Event) {
-  event.preventDefault()
+// Initialize selectedDate from fetched event using watch for better reactivity
+watch(
+  () => event.value?.date,
+  (eventDate) => {
+    selectedDate.value = stringDateToCalendarDate(eventDate)
+  },
+  { immediate: true },
+)
+
+async function onSubmit(eventForm: Event) {
+  eventForm.preventDefault()
   loading.value = true
 
   try {
-    await $fetch('/api/events/event', {
-      method: 'POST',
+    await $fetch(`/api/events/${eventId}/edit`, {
+      method: 'PATCH',
       body: formData,
     })
 
     toast.add({
-      title: 'Great !!',
-      description: 'Event created successfully',
+      title: 'Great!',
+      description: 'Event updated successfully',
       color: 'success',
     })
 
@@ -45,7 +61,7 @@ async function onSubmit(event: Event) {
       errors.value = error.data.data
     }
     else {
-      errors.value = [error.data.statusMessage || 'An arror occurred. Please try again.']
+      errors.value = [error.data.statusMessage || 'An error occurred. Please try again.']
     }
   }
   finally {
@@ -59,10 +75,16 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex items-center justify-center">
+  <div v-if="fetchError" class="flex justify-center items-center min-h-screen">
+    <span class="text-red-500">Error: {{ fetchError.statusMessage }}</span>
+  </div>
+  <div v-else-if="!event" class="flex justify-center items-center min-h-screen">
+    <span>Loading...</span>
+  </div>
+  <div v-else class="flex items-center justify-center">
     <div class="w-full max-w-md p-6">
       <h1 class="font-anton text-left mb-6 text-5xl">
-        Create Event
+        Edit Event
       </h1>
 
       <UForm
@@ -96,7 +118,7 @@ definePageMeta({
         <UPopover :popper="{ placement: 'bottom-start' }">
           <UButton
             variant="subtle"
-            icon="i-lucide-calendar"
+            icon="i-lucide-calendar-sync"
             :trailing="false"
           >
             {{ formData.date ? format(formData.date, 'd MMM, yyyy') : 'Pick a date' }}
@@ -117,7 +139,7 @@ definePageMeta({
           class="w-full"
           size="lg"
         >
-          Create event
+          Update event
         </UButton>
 
         <div v-if="errors.length" class="mt-4">
