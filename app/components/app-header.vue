@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { User } from '@/stores/user'
 import { useAuthStore } from '@/stores/user'
 
 const { loggedIn, user } = useUserSession()
@@ -37,8 +38,8 @@ const items = computed(() => {
 })
 
 onMounted(async () => {
-  if (loggedIn.value) {
-    authStore.login(user.value)
+  if (loggedIn.value && user.value) {
+    authStore.login(user.value as User)
   }
 })
 </script>
